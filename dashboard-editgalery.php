@@ -1,3 +1,7 @@
+<?php
+//include kan file koneksi kedatabase kedalam file index
+include 'database.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,14 +26,26 @@
 </head>
 
 <body>
+
+<?php
+		//ambil id dari link index edit (a herf edit.php?id=...)
+		$judul 	= $_GET['judul'];
+		//Ambil data dari tabel data_siswa dimana id = id dari string id diatas
+		$query	= " SELECT * FROM tbl_galery WHERE nama_gambar='$judul' ";
+		//eksekusi $query
+		$re		= mysqli_query($dbcon, $query);
+		//cocokkan data
+		$tampil	= mysqli_fetch_array($re);
+		?>
+
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
       <div class="text-center navbar-brand-wrapper d-flex align-items-top justify-content-center">
-        <a class="navbar-brand brand-logo" href="dashboard-post.php">
-          <img src="home/images/logos.png" alt="logo" />
+        <a class="navbar-brand brand-logo" href="dashboard-index.php">
+          <img src="home/images/aa.jpg" alt="logo" />
         </a>
-        <a class="navbar-brand brand-logo-mini" href="dashboard-post.php">
+        <a class="navbar-brand brand-logo-mini" href="dashboard-index.php">
           <img src="home/images/logo-mini.svg" alt="logo" />
         </a>
       </div>
@@ -69,45 +85,18 @@
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="dashboard-post.php">
+            <a class="nav-link" href="dashboard-index.php">
+            <i class="menu-icon mdi mdi-home"></i>
               <span class="home/menu-title">Index</span>
             </a>
           </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="dashboard-post.php">
-              <i class="menu-icon mdi mdi-television"></i>
-              <span class="home/menu-title">Input Post</span>
-            </a>
-          </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="dashboard-editpost.php">
-              <i class="menu-icon mdi mdi-television"></i>
-              <span class="home/menu-title">Edit Post</span>
-            </a>
-          </li>
-          
-        
-
-          <li class="nav-item">
-            <a class="nav-link" href="dashboard-galery.php">
-              <i class="menu-icon mdi mdi-backup-restore"></i>
-              <span class="home/menu-title">Input Gambar</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="dashboard-editgalery.php">
-              <i class="menu-icon mdi mdi-backup-restore"></i>
-              <span class="home/menu-title">Edit Gambar</span>
-            </a>
-          </li>
           
                 
           <li class="nav-item">
             <a class="nav-link"  href="#auth" aria-expanded="false" aria-controls="auth">
-              <i class="menu-icon mdi mdi-restart"></i>
+              <i class="menu-icon mdi mdi-logout"></i>
               <span class="menu-title">Log Out</span>
               <i class></i>
             </a>
@@ -129,22 +118,24 @@
                         <div class="card-body">
                           <div class="clearfix">
                             <div class="float-left">
-                              <i class="mdi mdi-cube text-danger icon-lg"></i>
+                              <i class="mdi mdi-cube text-warning icon-lg"></i>
                             </div>
                             
                               <!--edit sini form Post-->
                              <div class="float-left data1">
                                   <h2>DATA GAMBAR </h2>
                                   <br/>
+                                  <form method="POST" enctype="multipart/form-data">
                                           <div class="wrap-input100">
-                                            <span class="label-input100">Edit Judul Gambar</span>
-                                            <input class="input100" type="text" name="judul" value="<?php echo $tampil['nama_barang'];?>">
+                                            <span class="label-input100">Judul Gambar</span><br/><br/>
+                                            <span class="label-input100" ><?php echo $tampil['nama_gambar'];?></span>
                                             
                                           </div>
                                 <br/>
                                           <div class="wrap">
-                                            <span class="label-input100">Edit Url</span>
-                                            <input class="input102" type="file" name="url" data-ready="false">
+                                            <span class="label-input100">Edit Gambar</span>
+                                            <?php echo "<img src='img/".$tampil['url_gambar']."' width='100' height='100'>" ?>
+                                            <input class="input102" type="file" name="url">
                                             
                                           </div>
 
@@ -156,7 +147,8 @@
                                                 Edit Data
                                               </button>
                                             </div>
-                                          </div> 
+                                          </div>
+                                          </form> 
                                 </div>
 
                               
@@ -204,3 +196,29 @@
 </body>
 
 </html>
+
+<?php
+		//untuk if... -> jika tombol dengan nama submit ditekan maka .. 
+		if(isset($_POST['submit'])){
+
+			$judul 	= $_GET['judul'];
+
+			$url  = $_FILES['url']['name'];
+
+			$tmp  = $_FILES['url']['tmp_name'];
+
+			$urlbaru  = date('dmYHis').$url;
+
+			$path  = "img/".$urlbaru;
+
+			if(move_uploaded_file($tmp, $path )) {$query 	= "UPDATE tbl_galery SET url_gambar='$urlbaru', nama_gambar='$judul' WHERE nama_gambar='$judul' ";
+			}
+			
+			
+			//eksekusi
+			$insert = mysqli_query($dbcon, $query);
+			//setelah data berhasil di input redirect ke halaman index
+			header('Location: dashboard-index.php');
+		
+		}
+		?>
